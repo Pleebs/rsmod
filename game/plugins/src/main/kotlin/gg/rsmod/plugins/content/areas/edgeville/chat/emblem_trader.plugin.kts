@@ -11,7 +11,7 @@ arrayOf(Npcs.EMBLEM_TRADER, Npcs.EMBLEM_TRADER_7943).forEach { npc ->
         player.queue { chat(this) }
     }
 
-    on_npc_option(npc = npc, option = "trade") {
+    on_npc_option(npc = npc, option = "rewards") {
         open_bounty_store(player)
     }
 
@@ -25,25 +25,25 @@ arrayOf(Npcs.EMBLEM_TRADER, Npcs.EMBLEM_TRADER_7943).forEach { npc ->
         }
     }
 
-    if (npc == Npcs.EMBLEM_TRADER) {
-        on_npc_option(npc = npc, option = "hide-streaks") {
-            player.queue {
-                if (options("Yes", "No", title = "Hide kill streak data?") == 1) {
-                    hide_killstreak_data(player)
-                    player.message("Bounty Hunter kill streak data has now been hidden.")
-                }
-            }
-        }
-    } else if (npc == Npcs.EMBLEM_TRADER_7943) {
-        on_npc_option(npc = npc, option = "show-streaks") {
-            player.queue {
-                if (options("Yes", "No", title = "Show kill streak data?") == 1) {
-                    show_killstreak_data(player)
-                    player.message("Bounty Hunter kill streak data has now been activated.")
-                }
-            }
-        }
-    }
+//    if (npc == Npcs.EMBLEM_TRADER) {
+//        on_npc_option(npc = npc, option = "hide-streaks") {
+//            player.queue {
+//                if (options("Yes", "No", title = "Hide kill streak data?") == 1) {
+//                    hide_killstreak_data(player)
+//                    player.message("Bounty Hunter kill streak data has now been hidden.")
+//                }
+//            }
+//        }
+//    } else if (npc == Npcs.EMBLEM_TRADER_7943) {
+//        on_npc_option(npc = npc, option = "show-streaks") {
+//            player.queue {
+//                if (options("Yes", "No", title = "Show kill streak data?") == 1) {
+//                    show_killstreak_data(player)
+//                    player.message("Bounty Hunter kill streak data has now been activated.")
+//                }
+//            }
+//        }
+//    }
 }
 
 suspend fun chat(it: QueueTask) {

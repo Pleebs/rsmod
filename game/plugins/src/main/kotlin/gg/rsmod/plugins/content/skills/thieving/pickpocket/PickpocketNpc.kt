@@ -27,8 +27,8 @@ enum class PickpocketNpc(val npcIds: IntArray, val experience: Double, val reqLe
                     //Man NPC npcIds
                     Npcs.MAN_3014, Npcs.MAN_3106, Npcs.MAN_3107, Npcs.MAN_3108, Npcs.MAN_3109,
                     Npcs.MAN_3110, Npcs.MAN_3261, Npcs.MAN_3264, Npcs.MAN_3265, Npcs.MAN_3266,
-                    Npcs.MAN_3298, Npcs.MAN_3652, Npcs.MAN_4268, Npcs.MAN_4269, Npcs.MAN_6987, Npcs.MAN_6988,
-                    Npcs.MAN_6989, Npcs.MAN_6776,
+                    Npcs.MAN_3298, Npcs.MAN_3652, Npcs.MAN_6987, Npcs.MAN_6988,
+                    Npcs.MAN_6989,
 
                     //Woman NPC Ids
                     Npcs.WOMAN_3015, Npcs.WOMAN_3111, Npcs.WOMAN_3112, Npcs.WOMAN_3113, Npcs.WOMAN_3299,
@@ -44,7 +44,7 @@ enum class PickpocketNpc(val npcIds: IntArray, val experience: Double, val reqLe
     ),
     FARMER(
             npcIds = intArrayOf(
-                    Npcs.FARMER_3243, Npcs.FARMER_3244, Npcs.FARMER_3245
+                    Npcs.FARMER_3243, Npcs.FARMER_3244
             ),
             experience = 14.5,
             reqLevel = 10,

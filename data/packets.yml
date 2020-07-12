@@ -106,7 +106,7 @@ out-packets:
 
   - message: gg.rsmod.game.message.impl.RebuildLoginMessage
     type: VARIABLE_SHORT
-    opcode: 0
+    opcode: 21
     structure:
       - name: gpi
         type: BYTES
@@ -115,6 +115,7 @@ out-packets:
         type: SHORT
         trans: ADD
       - name: x
+        order: LITTLE
         type: SHORT
         trans: ADD
       - name: xteas
@@ -122,31 +123,30 @@ out-packets:
 
   - message: gg.rsmod.game.message.impl.RebuildNormalMessage
     type: VARIABLE_SHORT
-    opcode: 0
+    opcode: 21
     structure:
       - name: z
-        order: LITTLE
-        type: SHORT
-        trans: ADD
-      - name: x
         type: SHORT
         trans: ADD
       - name: xteas
         type: BYTES
+      - name: x
+        type: SHORT
+        trans: ADD
 
   - message: gg.rsmod.game.message.impl.RebuildRegionMessage
     type: VARIABLE_SHORT
-    opcode: 51
+    opcode: 46
     structure:
       - name: z
         type: SHORT
         trans: ADD
+      - name: force_load
+        type: BYTE
       - name: x
         order: LITTLE
         type: SHORT
         trans: ADD
-      - name: force_load
-        type: BYTE
       - name: data
         type: BYTES
 
@@ -372,10 +372,12 @@ out-packets:
     type: FIXED
     opcode: 21
     structure:
-      - name: hash
-        type: INT
       - name: hidden
         type: BYTE
+        trans: ADD
+      - name: hash
+        type: INT
+        order: LITTLE
 
   - message: gg.rsmod.game.message.impl.IfSetObjectMessage
     type: FIXED
