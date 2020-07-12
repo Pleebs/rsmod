@@ -1,8 +1,12 @@
 package gg.rsmod.net.codec.login
 
 import gg.rsmod.net.codec.StatefulFrameDecoder
-import gg.rsmod.util.io.BufferUtils.readJagexString
-import gg.rsmod.util.io.BufferUtils.readString
+import gg.rsmod.net.packet.DataType
+import gg.rsmod.util.io.ByteBufExt.readInverseMiddleInt
+import gg.rsmod.util.io.ByteBufExt.readJagexString
+import gg.rsmod.util.io.ByteBufExt.readMiddleEndianInt
+import gg.rsmod.util.io.ByteBufExt.readString
+import gg.rsmod.util.io.ByteBufExt.toByteArraySafe
 import gg.rsmod.util.io.Xtea
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
@@ -11,6 +15,7 @@ import io.netty.channel.ChannelHandlerContext
 import mu.KLogging
 import java.math.BigInteger
 import java.util.Arrays
+import java.util.logging.Logger
 
 /**
  * @author Tom <rspsmods@gmail.com>
@@ -68,7 +73,7 @@ class LoginDecoder(private val serverRevision: Int, private val cacheCrcs: IntAr
             val secureBuf: ByteBuf = if (rsaExponent != null && rsaModulus != null) {
                 val secureBufLength = buf.readUnsignedShort()
                 val secureBuf = buf.readBytes(secureBufLength)
-                val rsaValue = BigInteger(secureBuf.array()).modPow(rsaExponent, rsaModulus)
+                val rsaValue = BigInteger(secureBuf!!.toByteArraySafe()).modPow(rsaExponent, rsaModulus)
                 Unpooled.wrappedBuffer(rsaValue.toByteArray())
             } else {
                 buf
@@ -100,16 +105,16 @@ class LoginDecoder(private val serverRevision: Int, private val cacheCrcs: IntAr
             } else {
                 val authType = secureBuf.readByte().toInt()
 
-                if (authType == 1) {
+                if (authType == 0) {
                     authCode = secureBuf.readInt()
-                } else if (authType == 0 || authType == 2) {
+                } else if (authType == 1 || authType == 3) {
                     authCode = secureBuf.readUnsignedMedium()
                     secureBuf.skipBytes(Byte.SIZE_BYTES)
                 } else {
                     authCode = secureBuf.readInt()
                 }
 
-                secureBuf.skipBytes(Byte.SIZE_BYTES)
+                secureBuf.skipBytes(Byte.SIZE_BYTES) // client ordinal is not used
                 password = secureBuf.readString()
             }
 
@@ -122,48 +127,62 @@ class LoginDecoder(private val serverRevision: Int, private val cacheCrcs: IntAr
                 logger.info("User '{}' login request seed mismatch [receivedSeed=$reportedSeed, expectedSeed=$serverSeed].", username, reportedSeed, serverSeed)
                 ctx.writeResponse(LoginResultType.BAD_SESSION_ID)
                 return
+            } else {
+                logger.info("received proper seed: {}", reportedSeed)
             }
 
             val clientSettings = xteaBuf.readByte().toInt()
             val clientResizable = (clientSettings shr 1) == 1
+            val isLowDetail = clientSettings and 0xFF
+
             val clientWidth = xteaBuf.readUnsignedShort()
             val clientHeight = xteaBuf.readUnsignedShort()
 
-            xteaBuf.skipBytes(24) // random.dat data
-            xteaBuf.readString()
-            xteaBuf.skipBytes(Int.SIZE_BYTES)
+            /* Moved the skipping of all the MachineInfo bytes with comments */
+            decodeMachineInfo(xteaBuf)
 
-            xteaBuf.skipBytes(Byte.SIZE_BYTES * 10)
-            xteaBuf.skipBytes(Short.SIZE_BYTES)
-            xteaBuf.skipBytes(Byte.SIZE_BYTES)
-            xteaBuf.skipBytes(Byte.SIZE_BYTES * 3)
-            xteaBuf.skipBytes(Short.SIZE_BYTES)
-            xteaBuf.readJagexString()
-            xteaBuf.readJagexString()
-            xteaBuf.readJagexString()
-            xteaBuf.readJagexString()
-            xteaBuf.skipBytes(Byte.SIZE_BYTES)
-            xteaBuf.skipBytes(Short.SIZE_BYTES)
-            xteaBuf.readJagexString()
-            xteaBuf.readJagexString()
-            xteaBuf.skipBytes(Byte.SIZE_BYTES * 2)
-            xteaBuf.skipBytes(Int.SIZE_BYTES * 3)
-            xteaBuf.skipBytes(Int.SIZE_BYTES)
-            xteaBuf.readJagexString()
+            //logger.info("reading client type = 69?: {}", xteaBuf.readByte())
+            xteaBuf.skipBytes(Byte.SIZE_BYTES) // client type = 69
+            xteaBuf.skipBytes(Int.SIZE_BYTES) // always 0
 
-            xteaBuf.skipBytes(Int.SIZE_BYTES * 3)
+            val crcs = IntArray(cacheCrcs.size)
 
-            val crcs = IntArray(cacheCrcs.size) { xteaBuf.readInt() }
+            /**
+             * As of revision 190 the client now sends the CRCs out of order
+             * and with varying byte orders
+             */
+            val CRCorder = intArrayOf(
+                    6,2,11,7,8,
+                    12,19,13,18,
+                    14,17,9,5,1,
+                    20,16,15,10,3,
+                    4,0)
 
-            for (i in 0 until crcs.size) {
+            /**
+             * switch based on incoming CRCorder
+             */
+            for(i in CRCorder.indices){
+                when(val idx = CRCorder[i]){
+                    6,7,19,14 -> crcs[idx] = xteaBuf.readInverseMiddleInt()
+                    2,13,17,5,20,16,10,3,0 -> crcs[idx] = xteaBuf.readIntLE()
+                    11,8,12,18,9,1 -> crcs[idx] = xteaBuf.readMiddleEndianInt()
+                    15,4 -> crcs[idx] = xteaBuf.readInt()
+                }
+            }
+
+            for (idx in crcs.indices) {
                 /**
                  * CRC for index 16 is always sent as 0 (at least on the
                  * Desktop client, need to look into mobile).
                  */
-                if (i == 16) {
+                if (idx == 16) {
+                    //logger.info("CRC for idx{} -> {}", idx, crcs[idx])
                     continue
                 }
-                if (crcs[i] != cacheCrcs[i]) {
+
+                //logger.info("CRC for idx{} -> {}", idx, crcs[idx])
+
+                if (crcs[idx] != cacheCrcs[idx]) {
                     buf.resetReaderIndex()
                     buf.skipBytes(payloadLength)
                     logger.info { "User '$username' login request crc mismatch [requestCrc=${Arrays.toString(crcs)}, cacheCrc=${Arrays.toString(cacheCrcs)}]." }
@@ -180,6 +199,39 @@ class LoginDecoder(private val serverRevision: Int, private val cacheCrcs: IntAr
                     reconnecting = reconnecting)
             out.add(request)
         }
+    }
+
+    private fun decodeMachineInfo(xteaBuf: ByteBuf){
+        xteaBuf.skipBytes(Byte.SIZE_BYTES * 24) // random.dat data
+        xteaBuf.readString() // param9 = ElZAIrq5NpKN6D3mDdihco3oPeYN2KFy2DCquj7JMmECPmLrDP3Bnw
+        xteaBuf.skipBytes(Int.SIZE_BYTES) // param14 = 0
+
+        xteaBuf.skipBytes(Byte.SIZE_BYTES) // always 8
+        xteaBuf.skipBytes(Byte.SIZE_BYTES) // OStype "win" -> 1, mac -> 2, linux -> 3, others -> 4
+        xteaBuf.skipBytes(Byte.SIZE_BYTES) // is64bit true -> 1
+        xteaBuf.skipBytes(Short.SIZE_BYTES) // OS version "10.0" -> 11
+        xteaBuf.skipBytes(Byte.SIZE_BYTES) // javaVendor oracle -> 5
+
+        xteaBuf.skipBytes(Byte.SIZE_BYTES * 3) // file separator stuff
+        xteaBuf.skipBytes(Byte.SIZE_BYTES) // always false -> 0
+        xteaBuf.skipBytes(Short.SIZE_BYTES) // maxMem
+        xteaBuf.skipBytes(Byte.SIZE_BYTES) // JVMcores
+
+        // a bunch of 0 ints and empty Strings
+        xteaBuf.skipBytes(Byte.SIZE_BYTES * 3)
+        xteaBuf.skipBytes(Short.SIZE_BYTES)
+        xteaBuf.readJagexString()
+        xteaBuf.readJagexString()
+        xteaBuf.readJagexString()
+        xteaBuf.readJagexString()
+        xteaBuf.skipBytes(Byte.SIZE_BYTES)
+        xteaBuf.skipBytes(Short.SIZE_BYTES)
+        xteaBuf.readJagexString()
+        xteaBuf.readJagexString()
+        xteaBuf.skipBytes(Byte.SIZE_BYTES * 2)
+        xteaBuf.skipBytes(Int.SIZE_BYTES * 3) // empty array
+        xteaBuf.skipBytes(Int.SIZE_BYTES)
+        xteaBuf.readJagexString()
     }
 
     private fun ChannelHandlerContext.writeResponse(result: LoginResultType) {

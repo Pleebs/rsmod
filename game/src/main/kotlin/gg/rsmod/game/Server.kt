@@ -194,7 +194,8 @@ class Server {
         bootstrap.group(acceptGroup, ioGroup)
         bootstrap.channel(NioServerSocketChannel::class.java)
         bootstrap.childHandler(clientChannelInitializer)
-        bootstrap.option(ChannelOption.TCP_NODELAY, true).option(ChannelOption.SO_KEEPALIVE, true)
+        // disabled for now do to compatibility warning it is not present??
+        // bootstrap.option(ChannelOption.TCP_NODELAY, true).option(ChannelOption.SO_KEEPALIVE, true)
 
         /*
          * Bind all service networks, if applicable.

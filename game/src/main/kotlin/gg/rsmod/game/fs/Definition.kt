@@ -1,6 +1,6 @@
 package gg.rsmod.game.fs
 
-import gg.rsmod.util.io.BufferUtils.readString
+import gg.rsmod.util.io.ByteBufExt.readString
 import io.netty.buffer.ByteBuf
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 

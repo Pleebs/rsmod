@@ -6,7 +6,7 @@ val LIMIT_TARGETS_VARBIT = 6503
 val SKULL_SHORT_DURATION = 500
 val SKULL_LONG_DURATION = 2000
 
-arrayOf(Npcs.EMBLEM_TRADER, Npcs.EMBLEM_TRADER_316).forEach { npc ->
+arrayOf(Npcs.EMBLEM_TRADER, Npcs.EMBLEM_TRADER_7943).forEach { npc ->
     on_npc_option(npc = npc, option = "talk-to") {
         player.queue { chat(this) }
     }
@@ -34,7 +34,7 @@ arrayOf(Npcs.EMBLEM_TRADER, Npcs.EMBLEM_TRADER_316).forEach { npc ->
                 }
             }
         }
-    } else if (npc == Npcs.EMBLEM_TRADER_316) {
+    } else if (npc == Npcs.EMBLEM_TRADER_7943) {
         on_npc_option(npc = npc, option = "show-streaks") {
             player.queue {
                 if (options("Yes", "No", title = "Show kill streak data?") == 1) {
