@@ -52,6 +52,19 @@ object ByteBufExt {
 
     /**
      * Gets a 32-bit integer at the current {@code readerIndex}
+     * in Litte endian format (DCBA)
+     * and increases the {@code readerIndex} by {@code 4} in this buffer.
+     *
+     * @throws IndexOutOfBoundsException
+     *         if {@code this.readableBytes} is less than {@code 4}
+     */
+    fun ByteBuf.readLEInt(): Int {
+        if(readableBytes() < 4) throw IndexOutOfBoundsException("buffer does not contain enough bytes to read an int")
+        return (readByte().toInt() and 0xFF) + ((readByte().toInt() and 0xFF) shl 8) + ((readByte().toInt() and 0xFF) shl 16) + ((readByte().toInt() and 0xFF) shl 24)
+    }
+
+    /**
+     * Gets a 32-bit integer at the current {@code readerIndex}
      * in Inverse Middle endian format (BADC)
      * and increases the {@code readerIndex} by {@code 4} in this buffer.
      *

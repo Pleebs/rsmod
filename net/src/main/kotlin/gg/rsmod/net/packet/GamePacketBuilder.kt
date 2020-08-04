@@ -151,12 +151,21 @@ class GamePacketBuilder {
             DataOrder.MIDDLE -> {
                 Preconditions.checkArgument(transformation == DataTransformation.NONE, "Middle endian cannot be transformed.")
 
-                Preconditions.checkArgument(type == DataType.INT, "Middle endian can only be used with an integer.")
+                Preconditions.checkArgument(type == DataType.INT || type == DataType.MEDIUM, "Middle endian can only be used with an integer or medium.")
 
-                buffer.writeByte((longValue shr 8).toByte().toInt())
-                buffer.writeByte(longValue.toByte().toInt())
-                buffer.writeByte((longValue shr 24).toByte().toInt())
-                buffer.writeByte((longValue shr 16).toByte().toInt())
+                when(type){
+                    DataType.MEDIUM -> {
+                        buffer.writeByte((longValue shr 8).toByte().toInt())
+                        buffer.writeByte((longValue shr 16).toByte().toInt())
+                        buffer.writeByte(longValue.toByte().toInt())
+                    }
+                    DataType.INT -> {
+                        buffer.writeByte((longValue shr 8).toByte().toInt())
+                        buffer.writeByte(longValue.toByte().toInt())
+                        buffer.writeByte((longValue shr 24).toByte().toInt())
+                        buffer.writeByte((longValue shr 16).toByte().toInt())
+                    }
+                }
             }
             DataOrder.INVERSED_MIDDLE -> {
                 Preconditions.checkArgument(transformation == DataTransformation.NONE, "Inversed middle endian cannot be transformed.")

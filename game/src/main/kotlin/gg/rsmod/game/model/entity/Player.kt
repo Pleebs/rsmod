@@ -26,6 +26,7 @@ import gg.rsmod.game.model.varp.VarpSet
 import gg.rsmod.game.service.log.LoggerService
 import gg.rsmod.game.sync.block.UpdateBlockType
 import it.unimi.dsi.fastutil.objects.ObjectArrayList
+import mu.KLogging
 import java.util.Arrays
 
 /**
@@ -377,6 +378,8 @@ open class Player(world: World) : Pawn(world) {
      */
     fun register(): Boolean = world.register(this)
 
+    val logger = KLogging().logger
+
     /**
      * Handles any logic that should be executed upon log in.
      */
@@ -396,6 +399,7 @@ open class Player(world: World) : Pawn(world) {
             val tiles = IntArray(gpiTileHashMultipliers.size)
             System.arraycopy(gpiTileHashMultipliers, 0, tiles, 0, tiles.size)
 
+            logger.info("writing rebuild login message with coord(${tile.z},${tile.x}) and size = ${tiles.size}")
             write(RebuildLoginMessage(index, tile, tiles, world.xteaKeyService))
             world.getService(LoggerService::class.java, searchSubclasses = true)?.logLogin(this)
         }

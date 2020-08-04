@@ -36,9 +36,9 @@ enum class DataType(val bytes: Int) {
     SHORT(2),
 
     /**
-     * A 'tri byte' - a group of three bytes.
+     * A medium also known as a 'tri byte'
      */
-    TRI_BYTE(3),
+    MEDIUM(3),
 
     /**
      * An integer.

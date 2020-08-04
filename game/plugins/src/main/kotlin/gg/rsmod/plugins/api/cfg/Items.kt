@@ -15679,5 +15679,11 @@ object Items {
     const val WARRIOR_PATH_STARTER_KIT = 24859
     const val WIZARD_PATH_STARTER_KIT = 24860
     const val RANGER_PATH_STARTER_KIT = 24861
+    const val KARAMJAN_MONKEY = 24862
+    const val ZOMBIE_MONKEY = 24863
+    const val MANIACAL_MONKEY = 24864
+    const val SKELETON_MONKEY = 24865
+    const val KRUK_JR = 24866
+    const val PRINCELY_MONKEY = 24867
     /* Auto-generated file using class gg.rsmod.game.service.game.DumpEntityIdService */
 }

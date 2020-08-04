@@ -27,6 +27,8 @@ class LoginWorker(private val boss: LoginService, private val verificationServic
                 val client = Client.fromRequest(world, request.login)
                 val loadResult: PlayerLoadResult = boss.serializer.loadClientData(client, request.login)
 
+                logger.info("login result for ${client.loginUsername} = ${loadResult.name}")
+
                 if (loadResult == PlayerLoadResult.LOAD_ACCOUNT || loadResult == PlayerLoadResult.NEW_ACCOUNT) {
                     val decodeRandom = IsaacRandom(request.login.xteaKeys)
                     val encodeRandom = IsaacRandom(IntArray(request.login.xteaKeys.size) { request.login.xteaKeys[it] + 50 })
@@ -38,7 +40,9 @@ class LoginWorker(private val boss: LoginService, private val verificationServic
                         } else {
                             LoginResultType.COULD_NOT_COMPLETE_LOGIN
                         }
+
                         if (loginResult == LoginResultType.ACCEPTABLE) {
+                            logger.info("ACCEPTED LOGIN from ${client.loginUsername} writing response to ${client.index}")
                             client.channel.write(LoginResponse(index = client.index, privilege = client.privilege.id))
                             boss.successfulLogin(client, world, encodeRandom, decodeRandom)
                         } else {

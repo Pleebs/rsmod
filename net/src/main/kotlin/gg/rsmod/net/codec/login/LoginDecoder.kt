@@ -1,9 +1,9 @@
 package gg.rsmod.net.codec.login
 
 import gg.rsmod.net.codec.StatefulFrameDecoder
-import gg.rsmod.net.packet.DataType
 import gg.rsmod.util.io.ByteBufExt.readInverseMiddleInt
 import gg.rsmod.util.io.ByteBufExt.readJagexString
+import gg.rsmod.util.io.ByteBufExt.readLEInt
 import gg.rsmod.util.io.ByteBufExt.readMiddleEndianInt
 import gg.rsmod.util.io.ByteBufExt.readString
 import gg.rsmod.util.io.ByteBufExt.toByteArraySafe
@@ -15,7 +15,6 @@ import io.netty.channel.ChannelHandlerContext
 import mu.KLogging
 import java.math.BigInteger
 import java.util.Arrays
-import java.util.logging.Logger
 
 /**
  * @author Tom <rspsmods@gmail.com>
@@ -141,8 +140,8 @@ class LoginDecoder(private val serverRevision: Int, private val cacheCrcs: IntAr
             /* Moved the skipping of all the MachineInfo bytes with comments */
             decodeMachineInfo(xteaBuf)
 
-            //logger.info("reading client type = 69?: {}", xteaBuf.readByte())
-            xteaBuf.skipBytes(Byte.SIZE_BYTES) // client type = 69
+            //logger.info("reading client type = 133?: {}", xteaBuf.readByte())
+            xteaBuf.skipBytes(Byte.SIZE_BYTES) // client type
             xteaBuf.skipBytes(Int.SIZE_BYTES) // always 0
 
             val crcs = IntArray(cacheCrcs.size)
@@ -164,7 +163,7 @@ class LoginDecoder(private val serverRevision: Int, private val cacheCrcs: IntAr
             for(i in CRCorder.indices){
                 when(val idx = CRCorder[i]){
                     6,7,19,14 -> crcs[idx] = xteaBuf.readInverseMiddleInt()
-                    2,13,17,5,20,16,10,3,0 -> crcs[idx] = xteaBuf.readIntLE()
+                    2,13,17,5,20,16,10,3,0 -> crcs[idx] = xteaBuf.readLEInt()
                     11,8,12,18,9,1 -> crcs[idx] = xteaBuf.readMiddleEndianInt()
                     15,4 -> crcs[idx] = xteaBuf.readInt()
                 }

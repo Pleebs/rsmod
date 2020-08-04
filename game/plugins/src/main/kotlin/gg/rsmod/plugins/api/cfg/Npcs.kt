@@ -6148,7 +6148,7 @@ object Npcs {
     const val STEVE_6799 = 6799
     const val PIEVE = 6801
     const val COMBAT_TEST = 6802
-    const val MANIACAL_MONKEY = 6803
+    const val MANIACAL_MONKEY_6803 = 6803
     const val KRUK_6804 = 6804
     const val KRUK_6805 = 6805
     const val ASSISTANT_LE_SMITH_6806 = 6806
@@ -8748,5 +8748,32 @@ object Npcs {
     const val GRAVE = 9856
     const val GRAVE_9857 = 9857
     const val SQUIRE_10368 = 10368
+    const val BOBAWU = 10369
+    const val MARTEN = 10370
+    const val WIZARD_10371 = 10371
+    const val WIZARD_10372 = 10372
+    const val WIZARD_10373 = 10373
+    const val HILL_GIANT_10374 = 10374
+    const val HILL_GIANT_10375 = 10375
+    const val HILL_GIANT_10376 = 10376
+    const val FEROX = 10377
+    const val SIGISMUND = 10378
+    const val ZAMORAKIAN_ACOLYTE = 10379
+    const val ZAMORAKIAN_ACOLYTE_10380 = 10380
+    const val ZAMORAKIAN_ACOLYTE_10381 = 10381
+    const val REFUGEE = 10382
+    const val REFUGEE_10383 = 10383
+    const val REFUGEE_10384 = 10384
+    const val REFUGEE_10385 = 10385
+    const val PHABELLE_BILE = 10386
+    const val DERSE_VENATOR = 10387
+    const val ANDROS_MAI = 10388
+    const val BANKER_10389 = 10389
+    const val MERCENARY_10390 = 10390
+    const val FINANCIAL_WIZARD_10391 = 10391
+    const val CAMARST = 10392
+    const val WARRIOR_OF_MURAHS = 10393
+    const val WARRIOR_OF_MURAHS_10394 = 10394
+    const val WARRIOR_OF_MURAHS_10395 = 10395
     /* Auto-generated file using class gg.rsmod.game.service.game.DumpEntityIdService */
 }
