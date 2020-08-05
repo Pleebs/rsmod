@@ -22,11 +22,6 @@ class GamePacketEncoder(private val random: IsaacRandom?) : MessageToByteEncoder
             logger.error("Message length {} too long for 'variable-short' packet on channel {}.", DecimalFormat().format(msg.length), ctx.channel())
             return
         }
-        if(msg.opcode == 79) {
-            logger.error("opcode 79 isn't implemented yet! how are we writing it??")
-            msg.payload.release()
-            return
-        }
         out.writeByte((msg.opcode + (random?.nextInt() ?: 0)) and 0xFF)
         when (msg.type) {
             PacketType.VARIABLE_BYTE -> out.writeByte(msg.length)
