@@ -33,7 +33,6 @@ on_login {
     player.sendWeaponComponentInformation()
     player.sendCombatLevelText()
 
-
     // Interface-related logic.
     player.openOverlayInterface(player.interfaces.displayMode)
     InterfaceDestination.values.filter { pane -> pane.interfaceId != -1 }.forEach { pane ->

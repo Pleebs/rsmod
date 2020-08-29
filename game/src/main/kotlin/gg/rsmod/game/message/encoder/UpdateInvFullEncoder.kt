@@ -29,11 +29,11 @@ class UpdateInvFullEncoder : MessageEncoder<UpdateInvFullMessage>() {
             val buf = GamePacketBuilder()
             message.items.forEach { item ->
                 if (item != null) {
-                    buf.put(DataType.SHORT, item.id + 1)
                     buf.put(DataType.BYTE, Math.min(255, item.amount))
                     if (item.amount >= 255) {
-                        buf.put(DataType.INT, DataOrder.INVERSED_MIDDLE, item.amount)
+                        buf.put(DataType.INT, DataOrder.LITTLE, item.amount)
                     }
+                    buf.put(DataType.SHORT, DataOrder.LITTLE, item.id + 1)
                 } else {
                     buf.put(DataType.SHORT, 0)
                     buf.put(DataType.BYTE, 0)
